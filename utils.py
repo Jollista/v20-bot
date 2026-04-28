@@ -1,4 +1,5 @@
 import random
+from discord import Color as color
 
 def roll(number:int, size:int):
     results = []
@@ -10,3 +11,10 @@ def roll(number:int, size:int):
 
 def roll(size:int):
     return random.randint(1, size)
+
+colors = [
+        color.dark_blue(), color.dark_embed(), color.dark_gold(), color.dark_green(), color.dark_grey(), color.dark_magenta(),
+        color.dark_orange(), color.dark_purple(), color.dark_red(), color.dark_teal(), color.dark_theme(), color.darker_grey()
+    ]
+def get_color():
+    return colors[random.randint(0, len(colors)-1)]
