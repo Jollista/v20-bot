@@ -1,5 +1,13 @@
 import random
 from discord import Color as color
+import discord
+
+def get_prefix():
+    return prefix
+
+def update_prefix(new_pre:str, guild_id):
+    prefix = new_pre
+    print("prefix updated!\n" + "new_pre:", new_pre, "\nguild id:", guild_id)
 
 def roll(number:int, size:int):
     results = []

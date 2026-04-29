@@ -1,4 +1,5 @@
 from utils import *
+import time
 
 # Helper function for $r command
 # parses through args
@@ -12,7 +13,7 @@ def parse_args(args:list):
 
     print("args:", args)
 
-    if len(args) == 0 or args[0] == "h" or args[0] == "help":
+    if len(args) == 0 or args[0] == "help":
         return 0
 
     # get dots to roll
@@ -24,7 +25,8 @@ def parse_args(args:list):
 
     # parse args
     assign_diff = False
-    for arg in args:
+    for i in range(len(args)):
+        arg = args[i]
         print("arg:", arg)
         if assign_diff:
             diff = int(arg)
@@ -39,8 +41,11 @@ def parse_args(args:list):
             ignore_ones = True
         else:
             # can't parse arg
-            message += arg + " "
-            print("can't parse arg:", arg)
+            j = i
+            while j < len(args):
+                message += args[j] + " "
+                j += 1
+            return (dots, diff, explode, wp, ignore_ones, message)
     
     return (dots, diff, explode, wp, ignore_ones, message)
 
@@ -119,16 +124,16 @@ def r(args:list):
         return (title, desc)
     elif parsed_args == 0: # help
         title = ""
-        desc = "**$r [number of dice] [args]**\n" \
+        desc = "**" + prefix + "r [number of dice] [args]**\n" \
         "Rolls a given number of dice at a default difficulty of 6.\n" \
-        "\nExample: `$r 10`\n" \
+        "\nExample: `" + prefix + "r 10`\n" \
         "\n**Advanced Options**\n" \
         "`-diff X` - sets the difficulty for the roll to X.\n" \
         "`e` - automatically explode all 10s.\n" \
         "`wp` - spend willpower, add one success automatically.\n" \
         "`i` - ignore 1s.\n" \
         "Additionally, any quoted string will be appended to the title.\n" \
-        "\nExample: `$r 10 -diff 8 e wp i 'hello world'`"
+        "\nExample: `" + prefix + "r 10 -diff 8 e wp i 'hello world'`"
         return (title, desc)
 
     dots = parsed_args[0]
@@ -160,3 +165,55 @@ def r(args:list):
         title += ", " + message
 
     return (title, desc)
+
+# prompt user to change prefix based on args
+def prompt_prefix(args:list):
+    """
+    Initiate prefix change.
+
+    Returns
+    -------
+    [0]
+        The description to be output
+    [1]
+        The new prefix, empty string if none
+    """
+
+    if len(args) == 0 or args[0] == "help": # output help
+        return ("Help message goes here", "")
+    elif len(args[0]) == 1: # update prefix?
+        return ("Change prefix from `" + prefix + "` to `" + args[0] + "`?", args[0])
+    elif args[0] == prefix: # prefix already set to arg
+        return ("Prefix is already `" + prefix + "`", "")
+
+# A button class used for interactions exclusive to 
+class ConfirmationButton(discord.ui.Button):
+    async def callback(self, interaction):
+
+        print("interaction: ", interaction)
+        print("custom id:", interaction.custom_id)
+
+        custom_ids = interaction.custom_id.split(":")
+        initiator_id = int(custom_ids[0])
+        action = custom_ids[1]
+        arg = custom_ids[2]
+
+        # ignore responses not from initiator
+        if interaction.user.id != initiator_id:
+            await interaction.response.defer()
+            return
+
+        match action:
+            case "prefix":
+                if arg != "":
+                    update_prefix(arg, interaction.guild_id)
+                pass
+            case _:
+                pass
+
+        v:discord.ui.View = self.view
+
+        for item in v.children:
+            item.disabled = True
+
+        await interaction.response.edit_message(view=v)
