@@ -45,9 +45,51 @@ async def on_message(message:discord.Message):
 
             # roll command
             case 'r':
-                output = commands.r(args, prefix)
-                title = output[0]
-                desc = output[1]
+                output = commands.r(args, prefix, auth.id)
+                print(output)
+                print(type(output) == str)
+
+                if type(output) != str:
+                    title = output[0]
+                    desc = output[1]
+
+                else:
+                    print("r output is str")
+                    desc = "Would you like to spend willpower for +1 success?"
+
+                    str_args = ""
+                    for arg in args:
+                        str_args += arg + " "
+
+                    yes_button = commands.ConfirmationButton(label="Yes", id=1)
+                    yes_button.message = message
+                    yes_button.action = "wp"
+                    yes_button.arg = str_args
+                    no_button = commands.ConfirmationButton(label="No", id=0)
+                    no_button.message = message
+                    no_button.action = "wp"
+                    no_button.arg = str_args
+                    view.add_item(yes_button)
+                    view.add_item(no_button)
+
+            # willpower command
+            case 'wp':
+                user = query(auth.id, "user data")
+
+                if not user: # no entry for user exists in user data
+                    # add them to database
+                    try:
+                        insert({"_id":auth.id, "wp":True}, "user data")
+                        desc = "Opted **into** willpower prompts!"
+                    except:
+                        desc = "Couldn't add user to database."
+
+                else: # user exists
+                    try:
+                        remove(auth.id, "user data")
+                        desc = "Opted **out** of willpower prompts!"
+                    except:
+                        desc = "Couldn't remove user from database."
 
             # prefix command
             case 'prefix':
@@ -63,8 +105,14 @@ async def on_message(message:discord.Message):
                     if new_pre != "":
                         c_id = str(message.author.id) + ":prefix:"
 
-                        yes_button = commands.ConfirmationButton(label="Yes", custom_id=c_id+new_pre)
-                        no_button = commands.ConfirmationButton(label="No", custom_id=c_id)
+                        yes_button = commands.ConfirmationButton(label="Yes")
+                        yes_button.message = message
+                        yes_button.action = "prefix"
+                        yes_button.arg = new_pre
+                        no_button = commands.ConfirmationButton(label="No")
+                        no_button.message = message
+                        no_button.action = "prefix"
+                        no_button.arg = ""
                         view.add_item(yes_button)
                         view.add_item(no_button)
             case _:

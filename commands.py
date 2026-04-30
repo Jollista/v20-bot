@@ -1,5 +1,4 @@
 from utils import *
-import time
 
 # Helper function for $r command
 # parses through args
@@ -19,14 +18,14 @@ def parse_args(args:list):
     # get dots to roll
     try:
         dots = int(args[0])
-        args.pop(0)
+        other_args = args[1:]
     except:
         return -1
 
     # parse args
     assign_diff = False
-    for i in range(len(args)):
-        arg = args[i]
+    for i in range(len(other_args)):
+        arg = other_args[i]
         print("arg:", arg)
         if assign_diff:
             diff = int(arg)
@@ -41,7 +40,7 @@ def parse_args(args:list):
             ignore_ones = True
         else:
             # can't parse arg
-            j = i
+            j = i+1
             while j < len(args):
                 message += args[j] + " "
                 j += 1
@@ -106,7 +105,7 @@ def count_successes(dots:int, diff:int, explode:bool, wp:bool, ignore_ones:bool,
 
 ### $r command ###
 # Rolls dice and formats output nicely.
-def r(args:list, prefix):
+def r(args:list, prefix, id, ignore_wp_prompt=False):
     title = ""
     desc = "description"
     
@@ -142,6 +141,11 @@ def r(args:list, prefix):
     wp = parsed_args[3]
     ignore_ones = parsed_args[4]
     message = parsed_args[5]
+
+    # if didn't arg wp and opted into wp prompts
+    if not ignore_wp_prompt and not wp and query(id, "user data"):
+        print("not ignoring wp prompt, didn't declare wp, and id found in user data")
+        return "prompt"
 
     # get rolls
     result = get_rolls(dots, explode)
@@ -189,32 +193,53 @@ def prompt_prefix(args:list, prefix):
 
 # A button class used for interactions exclusive to 
 class ConfirmationButton(discord.ui.Button):
+    message:discord.Message = None
+    action:str = None
+    arg = None
+
     async def callback(self, interaction):
 
         print("interaction: ", interaction)
-        print("custom id:", interaction.custom_id)
+        initiator_id = self.message.author.id
 
-        custom_ids = interaction.custom_id.split(":")
-        initiator_id = int(custom_ids[0])
-        action = custom_ids[1]
-        arg = custom_ids[2]
+        emb = discord.Embed()
+        auth = self.message.author
+        emb.set_author(name=auth.display_name, icon_url=auth.avatar)
+        emb.color = get_color()
 
         # ignore responses not from initiator
         if interaction.user.id != initiator_id:
             await interaction.response.defer()
             return
 
-        match action:
+        match self.action:
             case "prefix":
-                if arg != "":
-                    update_prefix(arg, interaction.guild_id)
-                pass
+                print("prefix self.arg: `" + self.arg + "`")
+                if self.arg != "":
+                    update_prefix(self.arg, interaction.guild_id)
+                    emb.description = "Prefix was changed to `" + self.arg + "`."
+                else:
+                    print("prefix not changed")
+                    emb.description = "Prefix was not changed."
+            case "wp":
+                # get list of arguments for roll command input
+                arg = self.arg.split(" ")
+                
+                # determine response based on confirmation buttons
+                if self.id == 1:
+                    arg.insert(1, "wp")
+                    print("Yes!", arg)
+                
+                # output message
+                output = r(arg, get_prefix(self.message.guild.id), -1, True)
+                emb.title = output[0]
+                emb.description = output[1]
             case _:
                 pass
 
+        # remove buttons and edit message
         v:discord.ui.View = self.view
-
         for item in v.children:
-            item.disabled = True
+            v.remove_item(item)
 
-        await interaction.response.edit_message(view=v)
+        await interaction.response.edit_message(embed=emb, view=v)

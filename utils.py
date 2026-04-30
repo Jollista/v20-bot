@@ -34,18 +34,23 @@ utility functions
 
 default_prefix = "$"
 
-def query(id):
+# database operations for ease of use 
+def query(id, coll="guild prefixes"):
     try:
-        return collection.find_one({"_id":id})
+        return db[coll].find_one({"_id":id})
     except:
         return -1
 
-def insert(post):
-    collection.insert_one(post)
+def insert(post, coll="guild prefixes"):
+    db[coll].insert_one(post)
 
-def update(id, up):
-    collection.update_one({"_id":id}, {"$set":up})
+def update(id, up, coll="guild prefixes"):
+    db[coll].update_one({"_id":id}, {"$set":up})
 
+def remove(id, coll="guild prefixes"):
+    db[coll].delete_one({"_id":id})
+
+# get prefix for specific guild
 def get_prefix(guild_id):
     result = query(guild_id)
 
@@ -57,9 +62,11 @@ def get_prefix(guild_id):
 
     return result
 
+# update guild's prefix
 def update_prefix(new_pre:str, guild_id):
     update(guild_id, {"prefix":new_pre})
 
+# roll XdY
 def roll(number:int, size:int):
     results = []
 
@@ -68,6 +75,7 @@ def roll(number:int, size:int):
     
     return results
 
+# roll 1dX
 def roll(size:int):
     return random.randint(1, size)
 
