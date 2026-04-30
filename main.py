@@ -103,8 +103,6 @@ async def on_message(message:discord.Message):
                     new_pre = output[1]
 
                     if new_pre != "":
-                        c_id = str(message.author.id) + ":prefix:"
-
                         yes_button = commands.ConfirmationButton(label="Yes")
                         yes_button.message = message
                         yes_button.action = "prefix"
