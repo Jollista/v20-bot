@@ -3,8 +3,7 @@ from dotenv import load_dotenv
 import discord
 from utils import *
 import commands
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
+import webserver
 
 
 """
@@ -127,5 +126,6 @@ async def on_message(message:discord.Message):
 
         await message.channel.send(embed=emb, view=view)
 
+webserver.keep_alive()
 load_dotenv()
 client.run(os.getenv("TOKEN"))
