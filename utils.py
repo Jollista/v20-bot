@@ -39,7 +39,7 @@ def query(id, coll="guild prefixes"):
     try:
         return db[coll].find_one({"_id":id})
     except:
-        return -1
+        return None
 
 def insert(post, coll="guild prefixes"):
     db[coll].insert_one(post)
