@@ -106,7 +106,7 @@ def count_successes(dots:int, diff:int, explode:bool, wp:bool, ignore_ones:bool,
 
 ### $r command ###
 # Rolls dice and formats output nicely.
-def r(args:list):
+def r(args:list, prefix):
     title = ""
     desc = "description"
     
@@ -167,7 +167,7 @@ def r(args:list):
     return (title, desc)
 
 # prompt user to change prefix based on args
-def prompt_prefix(args:list):
+def prompt_prefix(args:list, prefix):
     """
     Initiate prefix change.
 
@@ -180,7 +180,8 @@ def prompt_prefix(args:list):
     """
 
     if len(args) == 0 or args[0] == "help": # output help
-        return ("Help message goes here", "")
+        return ("**" + prefix + "prefix [new prefix]**\n"
+        "Change the prefix from `" + prefix + "` to any other single character.", "")
     elif len(args[0]) == 1: # update prefix?
         return ("Change prefix from `" + prefix + "` to `" + args[0] + "`?", args[0])
     elif args[0] == prefix: # prefix already set to arg
