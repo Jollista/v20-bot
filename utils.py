@@ -58,6 +58,7 @@ def get_prefix(guild_id):
         insert({"_id":guild_id, "prefix":default_prefix})
         result = default_prefix
     else:
+        print("result (fetched prefix):", result)
         result = result["prefix"]
 
     return result
