@@ -125,6 +125,10 @@ async def on_message(message:discord.Message):
         emb.color = get_color()
 
         await message.channel.send(embed=emb, view=view)
+        try:
+            await message.delete()
+        except:
+            print("Missing manage message permissions")
 
 webserver.keep_alive()
 load_dotenv()

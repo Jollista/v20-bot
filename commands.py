@@ -165,6 +165,7 @@ def r(args:list, prefix, id, ignore_wp_prompt=False):
     ig_msg = ", ignoring 1s" if ignore_ones else ""
     title = str(succ) + " successes" + wp_msg + ig_msg + " (diff " + str(diff) + ")"
     
+    print("message:", message)
     if message != "":
         title += ", " + message
 
