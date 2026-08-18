@@ -136,7 +136,11 @@ load_dotenv()
 
 try:
     client.run(os.getenv("TOKEN"))
-except discord.errors.HTTPException:
-    print("\n\n\nBLOCKED BY RATE LIMITS\nRESTARTING NOW\n\n\n")
+except discord.errors.HTTPException as e:
+    print("BLOCKED BY RATE LIMITS")
+    print(e.response)
+    print()
+    print(e.data)
+    print("RESTARTING")
     subprocess.run("python restarter.py")
     subprocess.run('kill 1')
