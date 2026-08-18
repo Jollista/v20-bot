@@ -4,6 +4,7 @@ import discord
 from utils import *
 import commands
 import webserver
+import subprocess
 
 
 """
@@ -132,4 +133,10 @@ async def on_message(message:discord.Message):
 
 webserver.keep_alive()
 load_dotenv()
-client.run(os.getenv("TOKEN"))
+
+try:
+    client.run(os.getenv("TOKEN"))
+except discord.errors.HTTPException:
+    print("\n\n\nBLOCKED BY RATE LIMITS\nRESTARTING NOW\n\n\n")
+    subprocess.run("python restarter.py")
+    subprocess.run('kill 1')
