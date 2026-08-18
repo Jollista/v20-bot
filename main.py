@@ -142,5 +142,5 @@ except discord.errors.HTTPException as e:
     print()
     print(e.data)
     print("RESTARTING")
-    subprocess.run("python restarter.py")
+    subprocess.run("python restarter.py " + e.data["Retry-After"])
     subprocess.run('kill 1')
